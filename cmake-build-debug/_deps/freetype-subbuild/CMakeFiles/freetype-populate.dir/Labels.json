@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/ehan/Documents/cop3504c/Project3Minesweeper/cmake-build-debug/_deps/freetype-subbuild/CMakeFiles/freetype-populate"
+		},
+		{
+			"file" : "/Users/ehan/Documents/cop3504c/Project3Minesweeper/cmake-build-debug/_deps/freetype-subbuild/CMakeFiles/freetype-populate.rule"
+		},
+		{
+			"file" : "/Users/ehan/Documents/cop3504c/Project3Minesweeper/cmake-build-debug/_deps/freetype-subbuild/CMakeFiles/freetype-populate-complete.rule"
+		},
+		{
+			"file" : "/Users/ehan/Documents/cop3504c/Project3Minesweeper/cmake-build-debug/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-build.rule"
+		},
+		{
+			"file" : "/Users/ehan/Documents/cop3504c/Project3Minesweeper/cmake-build-debug/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-configure.rule"
+		},
+		{
+			"file" : "/Users/ehan/Documents/cop3504c/Project3Minesweeper/cmake-build-debug/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-download.rule"
+		},
+		{
+			"file" : "/Users/ehan/Documents/cop3504c/Project3Minesweeper/cmake-build-debug/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-install.rule"
+		},
+		{
+			"file" : "/Users/ehan/Documents/cop3504c/Project3Minesweeper/cmake-build-debug/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-mkdir.rule"
+		},
+		{
+			"file" : "/Users/ehan/Documents/cop3504c/Project3Minesweeper/cmake-build-debug/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-patch.rule"
+		},
+		{
+			"file" : "/Users/ehan/Documents/cop3504c/Project3Minesweeper/cmake-build-debug/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-test.rule"
+		},
+		{
+			"file" : "/Users/ehan/Documents/cop3504c/Project3Minesweeper/cmake-build-debug/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"freetype-populate"
+		],
+		"name" : "freetype-populate"
+	}
+}
