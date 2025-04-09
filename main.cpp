@@ -112,6 +112,7 @@ int main() {
 
             }
 
+
         }
 
         text3.setString(nameTypedIn);
