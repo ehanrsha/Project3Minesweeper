@@ -57,24 +57,66 @@ int main() {
                 window.close();
             }
 
+            if (event.type == sf::Event::MouseButtonPressed) {
+                if (nameTypedIn.empty()) {
+                    nameTypedIn += "|";
+                }
+            }
+
+            //text commands
             if (event.type == sf::Event::TextEntered) {
-                char backspace = static_cast<char>(event.text.unicode);
-                if ((backspace == ' ') && (nameTypedIn.length() > 0)) {
-                    nameTypedIn.pop_back();
+                sf::Uint32 unicode = event.text.unicode;
+                nameTypedIn.pop_back();
+
+                //don't allow more than 10 characters
+                if ((nameTypedIn.length() == 10) && (unicode != 8 )) {
+                    break;
                 }
 
-                if (event.text.unicode < 128) {
-                    std::cout << static_cast<char>(event.text.unicode) << std::endl;
-                    char c = static_cast<char>(event.text.unicode);
-                    nameTypedIn += c;
+                //backspace command
+                if (unicode == 8) {
+                    nameTypedIn.pop_back();
+                    nameTypedIn += "|";
+                    break;
                 }
+
+                //Only read letters
+                if ((unicode >= 65 && unicode <= 90) || (unicode >= 97 && unicode <= 122)) {
+                    //First letter
+                    if (nameTypedIn.empty()) {
+                        if (unicode <= 90) {
+                            char c = static_cast<char>(unicode);
+                            nameTypedIn += c;
+                        }
+                        else {
+                            unicode -= 32;
+                            char c = static_cast<char>(unicode);
+                            nameTypedIn += c;
+                        }
+                    }
+                    else {
+                        if (unicode >= 97) {
+                            char c = static_cast<char>(unicode);
+                            nameTypedIn += c;
+                        }
+                        else {
+                            unicode += 32;
+                            char c = static_cast<char>(unicode);
+                            nameTypedIn += c;
+                        }
+
+                    }
+                }
+
+                nameTypedIn += "|";
+
             }
 
         }
 
         text3.setString(nameTypedIn);
 
-        window.clear();
+        window.clear(sf::Color::Blue);
         window.draw(text);
         window.draw(text2);
         window.draw(text3);
