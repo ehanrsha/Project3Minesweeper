@@ -2,6 +2,8 @@
 #include <SFML/Graphics.hpp>
 #include "playGame.hpp"
 #include <vector>
+#include <algorithm>  // for std::shuffle
+#include <random>     // for std::default_random_engine
 
 //each tile
 struct tile {
@@ -70,7 +72,6 @@ public:
 
         std::string num = std::to_string(x);
         std::string alpha = "files/images/number_" + num + ".png";
-        std::cout<<alpha<<std::endl;
         //to be built
         if (!adjacentMineTexture.loadFromFile(alpha))
         {
@@ -188,20 +189,33 @@ void playGame(sf::Font font, int mines, int widthOri, int heightOri){
             bool firstLine = true;
             bool secondLine = false;
             bool thirdLine = false;
+            int secondaryCounter = 0;
+            int yCoordinate = 0;
+            int xCoordinate = 0;
             for (int counter = 0; counter < 9; counter++) {
 
                 tile* pointerToTile;
                 if (firstLine) {
-                    pointerToTile = &fullTileList[y - 1][x - 1 + counter];
+                    yCoordinate = y - 1;
+                    xCoordinate = x - 1 + counter;
                 }
                 if (secondLine) {
-                    pointerToTile= &fullTileList[y][x - 1 + counter];
+                    yCoordinate = y;
+                    xCoordinate = x - 1 + secondaryCounter;
+                    secondaryCounter++;
                 }
                 if (thirdLine) {
-                    pointerToTile= &fullTileList[y + 1][x - 1 + counter];
+                    yCoordinate = y + 1;
+                    xCoordinate = x - 1 + secondaryCounter;
+                    secondaryCounter++;
                 }
 
-                fullTileList[y][x].addPointer(pointerToTile);
+                if (yCoordinate >= 0 && yCoordinate <= heightOri) {
+                    if (xCoordinate >= 0 && xCoordinate <= widthOri) {
+                        pointerToTile= &fullTileList[yCoordinate][xCoordinate];
+                        fullTileList[y][x].addPointer(pointerToTile);
+                    }
+                }
                 if (counter == 2) {
                     firstLine = false;
                     secondLine = true;
@@ -209,11 +223,26 @@ void playGame(sf::Font font, int mines, int widthOri, int heightOri){
                 if (counter == 5) {
                     secondLine = false;
                     thirdLine = true;
+                    secondaryCounter = 0;
                 }
 
             }
 
         }
+    }
+
+    //random assignment of mines
+    std::vector<tile*> compressedVector;
+    for (int y = 0; y < fullTileList.size(); y++) {
+        for (int x = 0; x < fullTileList[y].size(); x++) {
+            compressedVector.push_back(&fullTileList[y][x]);
+        }
+    }
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(compressedVector.begin(), compressedVector.end(), g);
+    for (int i = 0; i < mines; i++) {
+        compressedVector[i]->mine = true;
     }
 
     //Game Loop
