@@ -1,19 +1,29 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include "playGame.hpp"
+#include <fstream>
 
-//sets text to the center
-void setText(sf::Text &text, float x, float y){
-    sf::FloatRect textRect = text.getLocalBounds();
-    text.setOrigin(textRect.left + textRect.width/2.0f,
-    textRect.top + textRect.height/2.0f);
-    text.setPosition(sf::Vector2f(x, y));
-}
 
 int main() {
-    int width = 1000;
-    int height = 1000;
-    sf::RenderWindow window(sf::VideoMode(width, height), "my window");
+    //read config file to gain information for width and height
+    std::string width1;
+    std::string height1;
+    std::string mines1;
+    std::ifstream readFile("files/config.cfg");
+    std::getline(readFile, width1);
+    std::getline(readFile, height1);
+    std::getline(readFile, mines1);
+    int width = std::stoi(width1) * 32;
+    int widthOri = std::stoi(width1);
+    int height = (std::stoi(height1)*32) + 100;
+    int heightOri = (std::stoi(height1));
+    int mines = std::stoi(mines1);
+
+    std::cout<<heightOri<<std::endl;
+
+
+    sf::RenderWindow window(sf::VideoMode(widthOri * 32, (heightOri * 32) + 100), "Welcome Window");
 
     //load a font
     sf::Font font;
@@ -28,7 +38,7 @@ int main() {
     text.setColor(sf::Color::White);
     text.setStyle(sf::Text::Bold | sf::Text::Underlined);
     text.setCharacterSize(24);
-    setText(text, width/2, (height/2)-150);
+    setText(text, (width/2), ((height/2)-150));
 
     sf::Text text2;
     text2.setFont(font);
@@ -75,8 +85,13 @@ int main() {
 
                 //backspace command
                 if (unicode == 8) {
-                    nameTypedIn.pop_back();
-                    nameTypedIn += "|";
+                    if (nameTypedIn.length() == 0) {
+                        nameTypedIn += "|";
+                    }
+                    else {
+                        nameTypedIn.pop_back();
+                        nameTypedIn += "|";
+                    }
                     break;
                 }
 
@@ -112,7 +127,17 @@ int main() {
 
             }
 
-
+            //enter key
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter) {
+                if (nameTypedIn.length() == 1) {
+                    break;
+                }
+                if (nameTypedIn.empty()){
+                    break;
+                }
+                    window.close();
+                    playGame(font, mines, widthOri, heightOri);
+            }
         }
 
         text3.setString(nameTypedIn);

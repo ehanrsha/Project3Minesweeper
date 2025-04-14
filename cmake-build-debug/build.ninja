@@ -56,6 +56,13 @@ build CMakeFiles/Project3Minesweeper.dir/main.cpp.o: CXX_COMPILER__Project3Mines
   OBJECT_DIR = CMakeFiles/Project3Minesweeper.dir
   OBJECT_FILE_DIR = CMakeFiles/Project3Minesweeper.dir
 
+build CMakeFiles/Project3Minesweeper.dir/playGame.cpp.o: CXX_COMPILER__Project3Minesweeper_unscanned_Debug /Users/ehan/Documents/cop3504c/Project3Minesweeper/playGame.cpp || cmake_object_order_depends_target_Project3Minesweeper
+  DEP_FILE = CMakeFiles/Project3Minesweeper.dir/playGame.cpp.o.d
+  FLAGS = -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk -fcolor-diagnostics
+  INCLUDES = -isystem /Users/ehan/Documents/cop3504c/Project3Minesweeper/cmake-build-debug/_deps/sfml-src/include
+  OBJECT_DIR = CMakeFiles/Project3Minesweeper.dir
+  OBJECT_FILE_DIR = CMakeFiles/Project3Minesweeper.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target Project3Minesweeper
@@ -64,7 +71,7 @@ build CMakeFiles/Project3Minesweeper.dir/main.cpp.o: CXX_COMPILER__Project3Mines
 #############################################
 # Link the executable Project3Minesweeper
 
-build Project3Minesweeper: CXX_EXECUTABLE_LINKER__Project3Minesweeper_Debug CMakeFiles/Project3Minesweeper.dir/main.cpp.o | _deps/sfml-build/lib/libsfml-graphics-d.2.6.2.dylib _deps/sfml-build/lib/libsfml-window-d.2.6.2.dylib _deps/sfml-build/lib/libsfml-system-d.2.6.2.dylib || _deps/sfml-build/lib/libsfml-graphics-d.dylib _deps/sfml-build/lib/libsfml-system-d.dylib _deps/sfml-build/lib/libsfml-window-d.dylib _deps/sfml-build/lib/libsfml-graphics-d.dylib _deps/sfml-build/lib/libsfml-window-d.dylib _deps/sfml-build/lib/libsfml-system-d.dylib
+build Project3Minesweeper: CXX_EXECUTABLE_LINKER__Project3Minesweeper_Debug CMakeFiles/Project3Minesweeper.dir/main.cpp.o CMakeFiles/Project3Minesweeper.dir/playGame.cpp.o | _deps/sfml-build/lib/libsfml-graphics-d.2.6.2.dylib _deps/sfml-build/lib/libsfml-window-d.2.6.2.dylib _deps/sfml-build/lib/libsfml-system-d.2.6.2.dylib || _deps/sfml-build/lib/libsfml-graphics-d.dylib _deps/sfml-build/lib/libsfml-system-d.dylib _deps/sfml-build/lib/libsfml-window-d.dylib _deps/sfml-build/lib/libsfml-graphics-d.dylib _deps/sfml-build/lib/libsfml-window-d.dylib _deps/sfml-build/lib/libsfml-system-d.dylib
   FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk
   LINK_LIBRARIES = -Wl,-rpath,/Users/ehan/Documents/cop3504c/Project3Minesweeper/cmake-build-debug/_deps/sfml-build/lib  _deps/sfml-build/lib/libsfml-graphics-d.2.6.2.dylib  _deps/sfml-build/lib/libsfml-window-d.2.6.2.dylib  _deps/sfml-build/lib/libsfml-system-d.2.6.2.dylib
   OBJECT_DIR = CMakeFiles/Project3Minesweeper.dir

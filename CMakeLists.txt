@@ -12,7 +12,7 @@ FetchContent_Declare(SFML
         SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(Project3Minesweeper main.cpp)
+add_executable(Project3Minesweeper main.cpp playGame.cpp)
 target_compile_features(Project3Minesweeper PRIVATE cxx_std_17)
 target_link_libraries(Project3Minesweeper PRIVATE sfml-graphics)
 
