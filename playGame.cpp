@@ -12,6 +12,9 @@ sf::Sprite leaderBoardButton;
 sf::Texture leaderBoardTexture;
 sf::Texture pauseButtonTexture;
 sf::Texture happyFaceTexture;
+sf::Texture lossFaceTexture;
+sf::Texture winFaceTexture;
+
 sf::Texture debugButtonTexture;
 
 sf::Clock gameClock;
@@ -22,9 +25,12 @@ sf::Sprite clockDigit3;
 sf::Sprite clockDigit4;
 int totalSeconds = 0;
 int pausedSeconds = 0;
+int tilesRevealed = 0;
 
 bool debug = false;
 bool pause = false;
+bool gameOver = false; //used to disable the debug method when the game is over
+bool gameWon = false;
 
 //each tile
 struct tile {
@@ -149,7 +155,6 @@ public:
 
     //reveals the tile and assigns number
     void reveal() {
-
         //end game
         if (mine == true) {
             setMineTexture();
@@ -158,6 +163,7 @@ public:
         }
 
         hidden = false; //switches to revealed
+        tilesRevealed++;
 
         if (mineCount == 0) {
             std::cout << "minecount =0 is the issue" << std::endl;
@@ -219,6 +225,22 @@ void assignHappyFaceButton(int widthOri, int heightOri) {
     happyFaceButton.setTexture(happyFaceTexture);
     happyFaceButton.setPosition(sf::Vector2f(((widthOri/2) * 32) - 32, 32 * (heightOri+0.5)));
 }
+void assignLoseFaceButton() {
+    if (!lossFaceTexture.loadFromFile("files/images/face_lose.png"))
+    {
+        std::cout << "Failed to load debug button texture" << std::endl;
+        exit(EXIT_FAILURE); //closes the program
+    }
+    happyFaceButton.setTexture(lossFaceTexture);
+}
+void assignWinFaceButton() {
+    if (!winFaceTexture.loadFromFile("files/images/face_win.png"))
+    {
+        std::cout << "Failed to load debug button texture" << std::endl;
+        exit(EXIT_FAILURE); //closes the program
+    }
+    happyFaceButton.setTexture(winFaceTexture);
+}
 void assignPauseButton(int widthOri, int heightOri) {
     if (!pauseButtonTexture.loadFromFile("files/images/pause.png"))
     {
@@ -236,15 +258,6 @@ void assignLeaderBoardButton(int widthOri, int heightOri) {
     }
     leaderBoardButton.setTexture(leaderBoardTexture);
     leaderBoardButton.setPosition(sf::Vector2f((widthOri * 32) - 176, 32 * (heightOri + 0.5)));
-}
-
-//End Of Game
-void gameWon(bool gameWon) {
-    //show all mines
-    //change face icon
-    //disable debug
-    //disable play/pause
-    //open leaderboard
 }
 
 //check if debug button is pressed
@@ -272,31 +285,6 @@ void setText(sf::Text &text, float x, float y){
     text.setOrigin(textRect.left + textRect.width/2.0f,
     textRect.top + textRect.height/2.0f);
     text.setPosition(sf::Vector2f(x, y));
-}
-
-//Recursive call reveals all that don't have any mine relations
-//if a tile has a zero mine count, it calls this method which checks if its fellows have zero mines
-//if a fellow has zero it goes in depth into that otherwise continues searching
-void jumpClear(tile* currentTile) {
-
-    if (currentTile->hidden == false) {
-        return;
-    }
-
-    if (currentTile->getIfMine()) {
-        currentTile->reveal();
-        return;
-    }
-    if (currentTile->mineCount != 0) {
-        currentTile->reveal();
-        return;
-    }
-    if (currentTile->mineCount == 0) {
-        currentTile->reveal();
-        for (tile* nextTile : currentTile->adjacentTiles) {
-            jumpClear(nextTile);
-        }
-    }
 }
 
 //applying constraints to the texture for the clock
@@ -366,15 +354,18 @@ void clockSpriteCalculator(int secondsBroughtIn) {
 
 //pause/play functionality
 void pauseTimer() {
-    if (pause == true) {
-        pause = false;
-        beginGame();
-        return;
+    if (!gameOver) {
+        if (pause == true) {
+            pause = false;
+            beginGame();
+            return;
+        }
+        pause = true;
+        pausedSeconds += totalSeconds;
     }
-    pause = true;
-    pausedSeconds += totalSeconds;
 }
 
+//For the play/pause button
 bool checkIfButtonPressed(int xClick, int yClick) {
         sf::IntRect pauseRect = pauseButton.getTextureRect();
         sf::Vector2f pausePos = pauseButton.getPosition(); // Top-left corner of sprite
@@ -390,6 +381,54 @@ bool checkIfButtonPressed(int xClick, int yClick) {
 
         return false;
 }
+
+//End Of Game
+void gameWonMethod() {
+    if (gameWon == true) {
+        pauseTimer(); //pauses the timer
+        assignWinFaceButton(); //change face icon
+        gameOver = true; //disables play/pause
+        return;
+        std::cout << "game has been lost";
+    }
+
+    pauseTimer(); //pauses the timer
+    debug = true; //shows all mines
+    assignLoseFaceButton(); //change face icon
+    gameOver = true;//disable debug and disable play/pause
+    gameWon = false;
+
+    std::cout << "game has been lost!";
+
+    //open leaderboard
+}
+
+//Recursive call reveals all that don't have any mine relations
+//if a tile has a zero mine count, it calls this method which checks if its fellows have zero mines
+//if a fellow has zero it goes in depth into that otherwise continues searching
+void jumpClear(tile* currentTile) {
+
+    if (currentTile->hidden == false) {
+        return;
+    }
+
+    if (currentTile->getIfMine()) {
+        gameWonMethod();
+        currentTile->reveal();
+        return;
+    }
+    if (currentTile->mineCount != 0) {
+        currentTile->reveal();
+        return;
+    }
+    if (currentTile->mineCount == 0) {
+        currentTile->reveal();
+        for (tile* nextTile : currentTile->adjacentTiles) {
+            jumpClear(nextTile);
+        }
+    }
+}
+
 
 //open and play game window
 void playGame(sf::Font font, int mines, int widthOri, int heightOri){
@@ -548,6 +587,14 @@ void playGame(sf::Font font, int mines, int widthOri, int heightOri){
                         else {
                             debug = true;
                         }
+
+                        //when the game is over, debug is turned off
+                        if (gameOver && gameWon) {
+                            debug = false;
+                        }
+                        if (gameOver && !gameWon) {
+                            debug = true;
+                        }
                     }
                     //use to pause the timer
                     else if (checkIfButtonPressed(event.mouseButton.x, event.mouseButton.y)){
@@ -559,6 +606,11 @@ void playGame(sf::Font font, int mines, int widthOri, int heightOri){
                             std::cout << fullTileList[pixelY][pixelX].adjacentTiles.size() << std::endl;
                             jumpClear(&fullTileList[pixelY][pixelX]);
                             element.hidden = false;
+                        }
+
+                        if (tilesRevealed == (widthOri * heightOri - mines)) {
+                            gameWon = true;
+                            gameWonMethod();
                         }
                     }
                 }
