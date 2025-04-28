@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>  // for std::shuffle
 #include <random>     // for std::default_random_engine
+namespace {
 //Buttons
 sf::Sprite debugButton;
 sf::Sprite happyFaceButton;
@@ -40,6 +41,7 @@ bool debug = false;
 bool pause = false;
 bool gameOver = false; //used to disable the debug method when the game is over
 bool gameWon = false;
+} // anonymous namespace
 
 //each tile
 struct tile {
