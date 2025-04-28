@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include "playGame.hpp"
+#include "leaderboard.hpp"
 #include <fstream>
 
 
@@ -136,6 +137,9 @@ int main() {
                     break;
                 }
                     window.close();
+                    //sets width and height for leaderboard
+                    nameTypedIn.pop_back();
+                    setNumbers(widthOri, heightOri, nameTypedIn);
                     playGame(font, mines, widthOri, heightOri);
             }
         }

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "playGame.hpp"
+#include "leaderboard.hpp"
 #include <vector>
 #include <algorithm>  // for std::shuffle
 #include <random>     // for std::default_random_engine
@@ -11,6 +12,7 @@ sf::Sprite pauseButton;
 sf::Sprite leaderBoardButton;
 sf::Texture leaderBoardTexture;
 sf::Texture pauseButtonTexture;
+sf::Texture playButtonTexture;
 sf::Texture happyFaceTexture;
 sf::Texture lossFaceTexture;
 sf::Texture winFaceTexture;
@@ -27,6 +29,13 @@ int totalSeconds = 0;
 int pausedSeconds = 0;
 int tilesRevealed = 0;
 
+//Flag counter
+int flagCounter = 0;
+sf::Sprite counterDigit1;
+sf::Sprite counterDigit2;
+sf::Sprite counterDigit3;
+sf::Sprite negativeDigit;
+
 bool debug = false;
 bool pause = false;
 bool gameOver = false; //used to disable the debug method when the game is over
@@ -39,7 +48,7 @@ public:
     bool mine;
     bool flag;
     sf::Texture hiddenTexture; sf::Texture mineTexture; sf::Texture flagTexture; sf::Texture revealedTexture; sf::Texture adjacentMineTexture; sf::Texture debugTexture;
-    sf::Sprite hiddenSprite; sf::Sprite mineSprite; sf::Sprite flagSprite; sf::Sprite revealedSprite; sf::Sprite adjacentMineSprite; sf::Sprite debugMineSprite;
+    sf::Sprite hiddenSprite; sf::Sprite mineSprite; sf::Sprite flagSprite; sf::Sprite revealedSprite; sf::Sprite adjacentMineSprite; sf::Sprite debugMineSprite; sf::Sprite whilePausedTile;
     int xPos;
     int yPos;
     int mineCount;
@@ -69,6 +78,10 @@ public:
 
         setPosition(); //applies position for each sprite
         setDebugMineTexture(); //sets debug texture for debug mode
+
+        //while paused all tiles need to be in revealed format
+        whilePausedTile.setTexture(revealedTexture);
+
     }
 
     //set all the textures
@@ -151,6 +164,7 @@ public:
         revealedSprite.setPosition(sf::Vector2f(xPos * 32, yPos * 32));
         adjacentMineSprite.setPosition(sf::Vector2f(xPos * 32, yPos * 32));
         debugMineSprite.setPosition(sf::Vector2f(xPos * 32, yPos * 32));
+        whilePausedTile.setPosition(sf::Vector2f(xPos * 32, yPos * 32));
     }
 
     //reveals the tile and assigns number
@@ -178,9 +192,11 @@ public:
 
         if (flag == false) {
             flag = true;
+            flagCounter--;
         }
         else {
             flag = false;
+            flagCounter++;
         }
 
     }
@@ -205,6 +221,9 @@ public:
         }
     }
 };
+
+//tileList
+std::vector<std::vector<tile>> fullTileList;
 
 //assign buttons
 void assignDebugButton(int widthOri, int heightOri){
@@ -265,7 +284,6 @@ bool pressedDebugButton(int xClick, int yClick) {
     sf::IntRect rect = debugButton.getTextureRect();
     sf::Vector2f pos = debugButton.getPosition(); // Top-left corner of sprite
 
-    std::cout << "got to this point" << std::endl;
     int width = rect.width;
     int height = rect.height;
 
@@ -356,11 +374,13 @@ void clockSpriteCalculator(int secondsBroughtIn) {
 void pauseTimer() {
     if (!gameOver) {
         if (pause == true) {
+            pauseButton.setTexture(pauseButtonTexture);
             pause = false;
             beginGame();
             return;
         }
         pause = true;
+        pauseButton.setTexture(playButtonTexture);
         pausedSeconds += totalSeconds;
     }
 }
@@ -382,12 +402,49 @@ bool checkIfButtonPressed(int xClick, int yClick) {
         return false;
 }
 
+//For the play/pause button
+bool checkIfButtonPressedHappyFace(int xClick, int yClick) {
+    sf::IntRect happyFaceRect = happyFaceButton.getTextureRect();
+    sf::Vector2f happyFacePos = happyFaceButton.getPosition(); // Top-left corner of sprite
+
+    int width = happyFaceRect.width;
+    int height = happyFaceRect.height;
+
+    if ((xClick >= happyFacePos.x) && (xClick <= happyFacePos.x + width)) {
+        if ((yClick >= happyFacePos.y) && (yClick <= happyFacePos.y + height)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+//Check if leaderboard button is pressed
+bool checkIfLeaderBoardButtonPressed(int xClick, int yClick) {
+    sf::IntRect leaderboardrect = leaderBoardButton.getTextureRect();
+    sf::Vector2f leaderboardpos = leaderBoardButton.getPosition();
+
+    int width = leaderboardrect.width;
+    int height = leaderboardrect.height;
+
+    if ((xClick >= leaderboardpos.x) && (xClick <= leaderboardpos.x + width)) {
+        if ((yClick >= leaderboardpos.y) && (yClick <= leaderboardpos.y + height)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 //End Of Game
 void gameWonMethod() {
     if (gameWon == true) {
         pauseTimer(); //pauses the timer
         assignWinFaceButton(); //change face icon
         gameOver = true; //disables play/pause
+        openLeaderboard(gameWon, pausedSeconds);
+
         return;
         std::cout << "game has been lost";
     }
@@ -429,51 +486,57 @@ void jumpClear(tile* currentTile) {
     }
 }
 
+//count number of flags and print
+void countFlags() {
+    int firstDigit;
+    int secondDigit;
+    int thirdDigit;
 
-//open and play game window
-void playGame(sf::Font font, int mines, int widthOri, int heightOri){
-    //begins timer
-    beginGame();
-
-    //Setup clock code
-    if (!digitsTexture.loadFromFile("files/images/digits.png")) {
-        std::cout << "Failed to load debug button texture" << std::endl;
-        exit(EXIT_FAILURE); //closes the program
+    std::string randoString1 = std::to_string(flagCounter);
+    if (flagCounter < -99) {
+        firstDigit = randoString1[1] - '0';
+        secondDigit = randoString1[2] - '0';
+        thirdDigit = randoString1[3] - '0';
+    }
+    else if (flagCounter < -9) {
+        firstDigit = 0;
+        secondDigit = randoString1[1] - '0';
+        thirdDigit = randoString1[2] - '0';
+    }
+    else if (flagCounter <= - 1) {
+        firstDigit = 0;
+        secondDigit = 0;
+        thirdDigit = randoString1[1] - '0';
+    }
+    else if (flagCounter <= 9) {
+        firstDigit = 0;
+        secondDigit = 0;
+        thirdDigit = randoString1[0] - '0';
+    }
+    else if (flagCounter <= 99) {
+        firstDigit = 0;
+        secondDigit = randoString1[0] - '0';
+        thirdDigit = randoString1[1] - '0';
+    }
+    else {
+        firstDigit = randoString1[0] - '0';
+        secondDigit = randoString1[1] - '0';
+        thirdDigit = randoString1[2] - '0';
     }
 
-    //set clock positioning
-    clockDigit1.setPosition(sf::Vector2f((widthOri * 32) - 97, 32 * (heightOri + 0.5) + 16));
-    clockDigit2.setPosition(sf::Vector2f((widthOri * 32) - 97 + 21, 32 * (heightOri + 0.5) + 16));
-    clockDigit3.setPosition(sf::Vector2f((widthOri * 32) - 54, 32 * (heightOri + 0.5) + 16));
-    clockDigit4.setPosition(sf::Vector2f((widthOri * 32) - 54 + 21, 32 * (heightOri + 0.5) + 16));
+    //begin applying now:
+    sf::IntRect rect(firstDigit * 21, 0, 21, 32);
+    sf::IntRect rect1(secondDigit * 21, 0, 21, 32);
+    sf::IntRect rect2(thirdDigit * 21, 0, 21, 32);
+    sf::IntRect rect3(10 * 21, 0, 21, 32);
+    counterDigit1.setTextureRect(rect);
+    counterDigit2.setTextureRect(rect1);
+    counterDigit3.setTextureRect(rect2);
+    negativeDigit.setTextureRect(rect3);
+}
 
-    //sets textures
-    clockDigit1.setTexture(digitsTexture);
-    clockDigit2.setTexture(digitsTexture);
-    clockDigit3.setTexture(digitsTexture);
-    clockDigit4.setTexture(digitsTexture);
-
-    //assign buttons
-    assignDebugButton(widthOri, heightOri);
-    assignHappyFaceButton(widthOri, heightOri);
-    assignPauseButton(widthOri, heightOri);
-    assignLeaderBoardButton(widthOri, heightOri);
-
-    sf::RenderWindow window(sf::VideoMode(widthOri * 32, (heightOri * 32) + 100), "Minesweeper");
-
-    //set the list of the tiles
-    std::vector<std::vector<tile>> fullTileList;
-    for (int y = 0; y < heightOri; y++) {
-
-        std::vector<tile> listOfTiles;
-        for (int x = 0; x < widthOri; x++) {
-            tile first(x, y);
-            listOfTiles.push_back(first);
-        }
-
-        fullTileList.push_back(listOfTiles);
-    }
-
+//sets everything in the vector
+void gameReset(int widthOri, int heightOri, int mines) {
     //set Pointers
     for (int y = 0; y < fullTileList.size(); y++) {
         for (int x = 0; x < fullTileList[y].size(); x++) {
@@ -552,6 +615,116 @@ void playGame(sf::Font font, int mines, int widthOri, int heightOri){
             fullTileList[y][x].mineCounter();
         }
     }
+}
+
+//restart game
+void restartGame(int widthOri, int heightOri, int mines) {
+
+    pause = false;
+    gameOver = false;
+    debug = false;
+    gameWon = false;
+
+    //assignHappyFaceButton(widthOri, heightOri);
+
+    //rest timer
+    totalSeconds = 0;
+    pausedSeconds = 0;
+    beginGame(); //restart clock
+
+    tilesRevealed = 0;
+    flagCounter = mines;
+
+    //rebuild the grid
+    fullTileList.clear();
+
+    //set the list of the tiles
+    for (int y = 0; y < heightOri; y++) {
+        std::vector<tile> listOfTiles;
+        for (int x = 0; x < widthOri; x++) {
+            tile first(x, y);
+            listOfTiles.push_back(first);
+        }
+
+        fullTileList.push_back(listOfTiles);
+    }
+
+    // hide all tiles and clear flags
+    for (auto &row : fullTileList) {
+        for (auto &t : row) {
+            t.hidden = true;
+            t.flag   = false;
+            t.applyHiddenTexture();
+            t.applyFlagTexture();
+            t.applyRevealedTexture();
+        }
+    }
+
+    gameReset(widthOri, heightOri, mines);
+}
+
+
+//open and play game window
+void playGame(sf::Font font, int mines, int widthOri, int heightOri){
+    //begins timer
+    beginGame();
+
+    //inital amounts of flags
+    flagCounter = 5;
+
+    //Setup clock code
+    if (!digitsTexture.loadFromFile("files/images/digits.png")) {
+        std::cout << "Failed to load debug button texture" << std::endl;
+        exit(EXIT_FAILURE); //closes the program
+    }
+    //set up playbutton texture
+    if (!playButtonTexture.loadFromFile("files/images/play.png")) {
+        std::cout << "Failed to load play button texture" << std::endl;
+        exit(EXIT_FAILURE); //closes the program
+    }
+
+    //set clock + counter positioning
+    clockDigit1.setPosition(sf::Vector2f((widthOri * 32) - 97, 32 * (heightOri + 0.5) + 16));
+    clockDigit2.setPosition(sf::Vector2f((widthOri * 32) - 97 + 21, 32 * (heightOri + 0.5) + 16));
+    clockDigit3.setPosition(sf::Vector2f((widthOri * 32) - 54, 32 * (heightOri + 0.5) + 16));
+    clockDigit4.setPosition(sf::Vector2f((widthOri * 32) - 54 + 21, 32 * (heightOri + 0.5) + 16));
+    counterDigit1.setPosition(sf::Vector2f(33, 32 * (heightOri + 0.5) + 16));
+    counterDigit2.setPosition(sf::Vector2f(54, 32 * (heightOri + 0.5) + 16));
+    counterDigit3.setPosition(sf::Vector2f(75, 32 * (heightOri + 0.5) + 16));
+    negativeDigit.setPosition(sf::Vector2f(12, 32 * (heightOri + 0.5) + 16));
+
+    //sets textures
+    clockDigit1.setTexture(digitsTexture);
+    clockDigit2.setTexture(digitsTexture);
+    clockDigit3.setTexture(digitsTexture);
+    clockDigit4.setTexture(digitsTexture);
+    counterDigit1.setTexture(digitsTexture);
+    counterDigit2.setTexture(digitsTexture);
+    counterDigit3.setTexture(digitsTexture);
+    negativeDigit.setTexture(digitsTexture);
+
+    //assign buttons
+    assignDebugButton(widthOri, heightOri);
+    assignHappyFaceButton(widthOri, heightOri);
+    assignPauseButton(widthOri, heightOri);
+    assignLeaderBoardButton(widthOri, heightOri);
+
+    sf::RenderWindow window(sf::VideoMode(widthOri * 32, (heightOri * 32) + 100), "Minesweeper");
+
+    //set the list of the tiles
+    for (int y = 0; y < heightOri; y++) {
+
+        std::vector<tile> listOfTiles;
+        for (int x = 0; x < widthOri; x++) {
+            tile first(x, y);
+            listOfTiles.push_back(first);
+        }
+
+        fullTileList.push_back(listOfTiles);
+    }
+
+    //sets all other details for the vector
+    gameReset(widthOri, heightOri, mines);
 
     //Game Loop
     while(window.isOpen()) {
@@ -562,7 +735,8 @@ void playGame(sf::Font font, int mines, int widthOri, int heightOri){
                 window.close();
             }
 
-            //mouse button (left or right click)
+            if (!gameOver) {
+                //mouse button (left or right click)
             if (event.type == sf::Event::MouseButtonReleased)
             {
 
@@ -596,6 +770,27 @@ void playGame(sf::Font font, int mines, int widthOri, int heightOri){
                             debug = true;
                         }
                     }
+                    else if (checkIfButtonPressedHappyFace(event.mouseButton.x, event.mouseButton.y)) {
+                        restartGame(widthOri, heightOri, mines);
+                    }
+
+                    else if (checkIfLeaderBoardButtonPressed(event.mouseButton.x, event.mouseButton.y)) {
+
+                        // remember whether the game was already paused
+                        bool wasPausedBefore = pause;
+
+                        if (!pause) {
+                            pauseTimer();
+                        }
+                        std::cout << pausedSeconds << std::endl;
+                        openLeaderboard(gameWon, pausedSeconds);
+
+                        // if the game was running before opening leaderboard, resume
+                        if (!wasPausedBefore) {
+                            pauseTimer();
+                        }
+                    }
+
                     //use to pause the timer
                     else if (checkIfButtonPressed(event.mouseButton.x, event.mouseButton.y)){
                         pauseTimer();
@@ -615,12 +810,17 @@ void playGame(sf::Font font, int mines, int widthOri, int heightOri){
                     }
                 }
             }
+            }
+
         }
 
         //refresh time
         if (!pause) {
             clockSpriteCalculator(timeElapsed());
         }
+
+        //flagCounter
+        countFlags();
 
         window.clear(sf::Color::White);
 
@@ -653,11 +853,26 @@ void playGame(sf::Font font, int mines, int widthOri, int heightOri){
                 window.draw(clockDigit3);
                 window.draw(clockDigit4);
 
+                //draw flag counter
+                window.draw(counterDigit1);
+                window.draw(counterDigit2);
+                window.draw(counterDigit3);
+                if (flagCounter < 0) {
+                    window.draw(negativeDigit);
+                }
+
                 if (debug == true) {
 
                     if (fullTileList[y][x].mine == true) {
                         fullTileList[y][x].applyDebugMineTexture();
                         window.draw(fullTileList[y][x].debugMineSprite);
+                    }
+                }
+
+                //if pause button is pressed, make all tiles to revealed.
+                if (pause == true) {
+                    if (gameOver == false) {
+                        window.draw(fullTileList[y][x].whilePausedTile);
                     }
                 }
             }
