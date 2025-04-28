@@ -782,7 +782,35 @@ void playGame(sf::Font font, int mines, int widthOri, int heightOri){
                         if (!pause) {
                             pauseTimer();
                         }
-                        std::cout << pausedSeconds << std::endl;
+
+                        // Draw one frame to reveal all tiles
+                        window.clear(sf::Color::White);
+                        for (int y = 0; y < fullTileList.size(); y++) {
+                            for (int x = 0; x < fullTileList[y].size(); x++) {
+                                window.draw(fullTileList[y][x].whilePausedTile);
+                            }
+                        }
+
+                        // draw buttons
+                        window.draw(debugButton);
+                        window.draw(happyFaceButton);
+                        window.draw(pauseButton);
+                        window.draw(leaderBoardButton);
+                        // draw clock digits
+                        window.draw(clockDigit1);
+                        window.draw(clockDigit2);
+                        window.draw(clockDigit3);
+                        window.draw(clockDigit4);
+                        // draw flag counter
+                        window.draw(counterDigit1);
+                        window.draw(counterDigit2);
+                        window.draw(counterDigit3);
+                        if (flagCounter < 0) {
+                            window.draw(negativeDigit);
+                        }
+
+                        window.display();
+
                         openLeaderboard(gameWon, pausedSeconds);
 
                         // if the game was running before opening leaderboard, resume
