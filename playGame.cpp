@@ -467,6 +467,10 @@ void gameWonMethod() {
 //if a fellow has zero it goes in depth into that otherwise continues searching
 void jumpClear(tile* currentTile) {
 
+    if (currentTile -> flag) {
+        return;
+    }
+
     if (currentTile->hidden == false) {
         return;
     }
@@ -622,6 +626,8 @@ void gameReset(int widthOri, int heightOri, int mines) {
 //restart game
 void restartGame(int widthOri, int heightOri, int mines) {
 
+    happyFaceButton.setTexture(happyFaceTexture);
+
     pause = false;
     gameOver = false;
     debug = false;
@@ -672,7 +678,7 @@ void playGame(sf::Font font, int mines, int widthOri, int heightOri){
     beginGame();
 
     //inital amounts of flags
-    flagCounter = 5;
+    flagCounter = mines;
 
     //Setup clock code
     if (!digitsTexture.loadFromFile("files/images/digits.png")) {
@@ -737,6 +743,15 @@ void playGame(sf::Font font, int mines, int widthOri, int heightOri){
                 window.close();
             }
 
+            // Allow restart via happy face even after game over
+            if (event.type == sf::Event::MouseButtonReleased
+                && event.mouseButton.button == sf::Mouse::Left
+                && checkIfButtonPressedHappyFace(event.mouseButton.x, event.mouseButton.y))
+            {
+                restartGame(widthOri, heightOri, mines);
+                continue;
+            }
+
             if (!gameOver) {
                 //mouse button (left or right click)
             if (event.type == sf::Event::MouseButtonReleased)
@@ -744,6 +759,13 @@ void playGame(sf::Font font, int mines, int widthOri, int heightOri){
 
                 int pixelX = event.mouseButton.x / 32;
                 int pixelY = event.mouseButton.y / 32;
+
+                // Skip all actions if the clicked tile is flagged
+                if (event.mouseButton.button == sf::Mouse::Left &&
+                    pixelY < heightOri && pixelX < widthOri && fullTileList[pixelY][pixelX].flag) {
+                    continue;
+                    }
+
 
                 //right click to flag
                 if (event.mouseButton.button == sf::Mouse::Right)

@@ -87,6 +87,14 @@ void openLeaderboard(bool gameWon, int totalSeconds){
 
   file.close();
 
+    // Renumber entries so prefixes match vector positions
+    for (int i = 0; i < pastWinnerList.size(); ++i) {
+        size_t tabPos = pastWinnerList[i].find('\t');
+        if (tabPos != std::string::npos) {
+            std::string rest = pastWinnerList[i].substr(tabPos + 1);
+            pastWinnerList[i] = std::to_string(i + 1) + ".\t" + rest;
+        }
+    }
 
     //the final string
     for (int x = 0; x < pastWinnerList.size(); x++ ){
